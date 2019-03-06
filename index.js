@@ -1,29 +1,64 @@
-let balance = 500.00;
+class Account {
+  
+  constructor() {
+    this.transactions = []
+  }
 
-class Withdrawal {
+  get balance() {
+    return this.transactions.reduce((balance, t) => balance + t.value, 0)
+  }
 
-  constructor(amount) {
-    this.amount = amount;
+  addTransaction(transaction) {
+    this.transactions.push(transaction)
+  }
+}
+
+class Transaction {
+
+  constructor(amount, account) {
+    this.amount  = amount
+    this.account = account
   }
 
   commit() {
-    balance -= this.amount;
+    if (this.isAllowed()) {
+      this.time = new Date()
+      return this.account.addTransaction(this)
+    } 
+
+    return console.log('Insufficient funds. Transaction aborted.')
   }
 
+  isAllowed() {
+    return this.account.balance + this.value >= 0
+  }
 }
 
+class Withdrawal extends Transaction {
 
+  get value() {
+    return -this.amount
+  }
+}
 
+class Deposit extends Transaction {
+
+  get value() {
+    return this.amount
+  }
+}
 
 // DRIVER CODE BELOW
-// We use the code below to "drive" the application logic above and make sure it's working as expected
+const myAccount = new Account('x')
+const t1        = new Withdrawal(20, myAccount)
 
-t1 = new Withdrawal(50.25);
-t1.commit();
-console.log('Transaction 1:', t1);
+t1.commit()
+console.log('Current balance: ', myAccount.balance)
 
-t2 = new Withdrawal(9.99);
-t2.commit();
-console.log('Transaction 2:', t2);
+const t2 = new Deposit(8888888888, myAccount)
+t2.commit()
+console.log('Current balance: ', myAccount.balance)
 
-console.log('Balance:', balance);
+const t3 = new Withdrawal(300, myAccount)
+t3.commit()
+console.log('Current balance: ', myAccount.balance)
